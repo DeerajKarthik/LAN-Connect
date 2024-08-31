@@ -1,0 +1,46 @@
+import requests
+from requests.exceptions import ConnectionError, Timeout
+
+login_url = 'https://172.16.1.1:8090'
+payload = {
+    'username': '-----',
+    'password': '-----'
+}
+timeout_duration = 5
+
+def check_connection(url, timeout):
+    try:
+        response = requests.get(url, timeout=timeout, verify=False)
+        if response.status_code == 200:
+            print("Connection successful.")
+            return True
+        else:
+            print(f"Server responded with status code: {response.status_code}")
+            return False
+    except ConnectionError:
+        print(f"Failed to connect to {url}. Please check your network connection.")
+        return False
+    except Timeout:
+        print(f"Connection to {url} timed out after {timeout} seconds.")
+        return False
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return False
+
+def login():
+    try:
+        with requests.Session() as session:
+            response = session.post(login_url, data=payload, verify=False)
+            if response.status_code == 200:
+                print("Logged in successfully")
+            else:
+                print(f"Login failed with status code: {response.status_code}")
+                print(response.text)  # Print response to debug
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred during login: {e}")
+
+if __name__ == "__main__":
+    if check_connection(login_url, timeout_duration):
+        login()
+    else:
+        print("Could not establish a connection. Please try again later.")
